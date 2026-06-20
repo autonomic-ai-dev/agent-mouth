@@ -1,40 +1,66 @@
 # agent-mouth
 
-**Communication and notification daemon — webhook sending and event listening.**
+**Communication and approvals — Slack webhooks with AST-safe command validation.**
 
-agent-mouth sends notifications via webhooks and listens for events to relay to chat platforms.
+`agent-mouth` sends webhook notifications and validates approval payloads (e.g. blocking `rm -rf` in shell snippets) before agent-spine or muscle act on them.
 
----
-
-## Why agent-mouth?
-
-| Problem | agent-mouth answer |
-|---------|-------------------|
-| "I want my agent to notify Slack" | **Webhook sender** — POST JSON payload to any webhook URL |
-| "How do I hook events into ChatOps?" | **Event listening** — future NATS subscriber for automated notifications |
-
-## Commands
-
-| Command | Description |
-|---------|-------------|
-| `agent-mouth serve` | Start daemon (future: event listener) |
-| `agent-mouth send <message>` | Send a notification via webhook |
-| `agent-mouth status` | Show config |
+Standalone: `agent-mouth send` · Integrated: `POST /webhook/slack/approval`, spine registration on **3104**.
 
 ---
 
-## Quick Install
+## Install
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/autonomic-ai-dev/agent-mouth/master/scripts/install.sh | bash
 ```
 
+---
+
+## Quick start
+
+```bash
+agent-mouth status
+agent-mouth send "deploy complete"
+agent-mouth validate --command "cargo test"
+agent-mouth serve
+```
+
+---
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `serve` | HTTP daemon with webhook routes |
+| `send <message>` | POST to configured webhook URL |
+| `validate --command\|--script` | tree-sitter bash AST gate |
+| `status` | Config and webhook target |
+
+---
+
+## HTTP API
+
+| Endpoint | Description |
+|----------|-------------|
+| `GET /health` | Daemon health |
+| `POST /webhook/slack/approval` | Validated approval payload |
+| `POST /send` | Outbound notification |
+
+---
+
+## Configuration
+
+Section `[mouth]` in `~/.autonomic/config.toml` (default port **3104**).
+
+---
+
 ## Development
 
 ```bash
-cargo build --release -p agent-mouth
 cargo test --release -p agent-mouth
 ```
+
+---
 
 ## License
 
