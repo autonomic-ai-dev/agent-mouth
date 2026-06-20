@@ -1,13 +1,22 @@
 # Changelog
 
-## [v] - 2026-06-20
+All notable changes to this project will be documented in this file.
 
-### Added
-- Added Mermaid charts to README
-- Added `--version` flag to CLI parser
-
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.5.1] - 2026-06-20
+
+### Added
+
+- `--version` CLI flag (`1c99357`)
+- Mermaid architecture charts in README (`b28e6ee`)
+
+### Changed
+
+- Professional README with standalone and integrated usage (`5f78c79`)
 
 ## [0.5.0] - 2026-06-20
 
