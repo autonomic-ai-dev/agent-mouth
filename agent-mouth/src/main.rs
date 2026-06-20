@@ -21,6 +21,8 @@ enum Commands {
     },
     /// Show configuration and status
     Status,
+    /// Summarize log input from stdin
+    Summarize,
 }
 
 #[tokio::main]
@@ -46,6 +48,9 @@ async fn main() -> anyhow::Result<()> {
             println!("  config: {}", agent_mouth::config::Config::config_path().display());
             println!("  port: {}", config.server.port);
             println!("  spine: {}", config.spine.url);
+        }
+        Commands::Summarize => {
+            agent_mouth::summarize::summarize()?;
         }
     }
     Ok(())

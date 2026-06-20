@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-06-20
+
+### Added
+
+- **Log summarizer** — `cat logs.txt | agent-mouth summarize` reads stdin, detects errors/warnings, and outputs a structured summary with bullet points
+- **API summarization** — Uses OpenAI (via `OPENAI_API_KEY`) or Anthropic (via `ANTHROPIC_API_KEY`) when available for AI-powered summaries
+- **Local fallback** — Keyword-based analysis when no API key is configured
+
+### Changed
+
+- Version bumped from `0.2.0` to `0.3.0`
+
 ## [0.2.0] - 2026-06-20
 
 ### Added
