@@ -4,6 +4,15 @@
 
 `agent-mouth` sends webhook notifications and validates approval payloads (e.g. blocking `rm -rf` in shell snippets) before agent-spine or muscle act on them.
 
+```mermaid
+flowchart LR
+    Req[Agent Request] --> AST[tree-sitter AST Validation]
+    AST -- Safe --> Slack[Slack Webhook Approval]
+    AST -- Unsafe --> Reject[Reject Error]
+    Slack -- Approved --> Spine[agent-spine / agent-muscle]
+    Slack -- Denied --> Reject
+```
+
 Standalone: `agent-mouth send` · Integrated: `POST /webhook/slack/approval`, spine registration on **3104**.
 
 ---
