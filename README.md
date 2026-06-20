@@ -2,7 +2,24 @@
 
 **Communication and approvals — Slack webhooks with AST-safe command validation.**
 
-`agent-mouth` sends webhook notifications and validates approval payloads (e.g. blocking `rm -rf` in shell snippets) before agent-spine or muscle act on them.
+Part of the **[Autonomic AI](https://github.com/autonomic-ai-dev/agent-body)** ecosystem. Sends webhook notifications and validates approval payloads (e.g. blocking `rm -rf` in shell snippets) before agent-spine or muscle act on them.
+
+| Standalone | Integrated |
+|------------|------------|
+| `agent-mouth send` | `POST /webhook/slack/approval` |
+| `agent-mouth validate --command` | Spine registration on **3104** |
+| Log summarization | `[mouth]` in unified config |
+
+---
+
+## Why agent-mouth?
+
+| Problem | agent-mouth answer |
+|---------|-------------------|
+| Dangerous shell in agent plans | **`validate --command`** — tree-sitter bash AST gate |
+| Humans need approve/deny | **Slack webhook** — ChatOps before deploy nodes |
+| Logs are too long for humans | **`summarize`** — stdin log compression |
+| No outbound notify channel | **`send`** — webhook POST for status |
 
 ```mermaid
 flowchart LR
@@ -10,29 +27,37 @@ flowchart LR
     AST -- Safe --> Slack[Slack Webhook Approval]
     AST -- Unsafe --> Reject[Reject Error]
     Slack -- Approved --> Spine[agent-spine / agent-muscle]
-    Slack -- Denied --> Reject
 ```
-
-Standalone: `agent-mouth send` · Integrated: `POST /webhook/slack/approval`, spine registration on **3104**.
 
 ---
 
-## Install
+## Quick Install
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/autonomic-ai-dev/agent-mouth/master/scripts/install.sh | bash
+# or full stack:
+curl -fsSL https://raw.githubusercontent.com/autonomic-ai-dev/agent-body/master/scripts/install-all-organs.sh | bash
+```
+
+Verify:
+
+```bash
+agent-mouth version
+agent-mouth status
+agent-mouth validate --command "echo hello"
 ```
 
 ---
 
-## Quick start
+## Main features
 
-```bash
-agent-mouth status
-agent-mouth send "deploy complete"
-agent-mouth validate --command "cargo test"
-agent-mouth serve
-```
+| Feature | Setup | Why use it |
+|---------|-------|------------|
+| **AST validation** | `validate --command` | Block destructive commands before exec |
+| **Slack approvals** | `serve` + webhook URL | Human-in-the-loop ChatOps |
+| **Outbound notify** | `send <message>` | Pipeline status to Slack/Discord |
+| **Log summarize** | `summarize` (stdin) | Operator-friendly log digests |
+| **HTTP daemon** | `:3104` | Spine workflow integration |
 
 ---
 
@@ -43,6 +68,7 @@ agent-mouth serve
 | `serve` | HTTP daemon with webhook routes |
 | `send <message>` | POST to configured webhook URL |
 | `validate --command\|--script` | tree-sitter bash AST gate |
+| `summarize` | Summarize piped log input |
 | `status` | Config and webhook target |
 
 ---
@@ -60,6 +86,17 @@ agent-mouth serve
 ## Configuration
 
 Section `[mouth]` in `~/.autonomic/config.toml` (default port **3104**).
+
+---
+
+## Local setup
+
+```bash
+git clone https://github.com/autonomic-ai-dev/agent-mouth.git && cd agent-mouth
+cargo build --release -p agent-mouth
+agent-mouth validate --command "cargo test"
+echo "2026-06-20 ERROR timeout" | agent-mouth summarize
+```
 
 ---
 
