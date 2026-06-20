@@ -20,7 +20,9 @@ pub struct AppState {
 pub async fn start(config: Config) -> anyhow::Result<()> {
     tracing::info!("Starting agent-mouth daemon...");
     let spine = SpineClient::new(&config.spine.url, "agent-mouth", env!("CARGO_PKG_VERSION"));
-    spine.register().await?;
+    if let Err(e) = spine.register().await {
+        tracing::warn!(error = %e, "Failed to register with agent-spine, continuing without registration");
+    }
     let spine_clone = spine.clone();
     tokio::spawn(async move {
         loop {
