@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-06-20
+
+### Added
+
+- **Slack approval AST validation** — `POST /webhook/slack/approval` verifies signing secret and blocks destructive bash patterns
+- **`agent-mouth validate`** — CLI for `--command` or `--script` approval checks
+- Publishes `mouth.approval.validated` / `mouth.approval.rejected` to agent-spine
+
 ## [0.4.0] - 2026-06-20
 
 ### Added

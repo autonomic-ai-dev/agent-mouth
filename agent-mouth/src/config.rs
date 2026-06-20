@@ -6,6 +6,7 @@ use std::path::PathBuf;
 pub struct Config {
     pub server: ServerConfig,
     pub notifications: NotificationConfig,
+    pub slack: SlackConfig,
     pub spine: SpineConfig,
     pub logging: LoggingConfig,
 }
@@ -18,6 +19,16 @@ pub struct ServerConfig {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct NotificationConfig {
     pub default_webhook: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SlackConfig {
+    /// Slack signing secret for interactive webhook verification.
+    #[serde(default)]
+    pub signing_secret: String,
+    /// Optional default channel id for approval responses.
+    #[serde(default)]
+    pub approval_channel: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -36,6 +47,10 @@ impl Default for Config {
             server: ServerConfig { port: 3104 },
             notifications: NotificationConfig {
                 default_webhook: String::new(),
+            },
+            slack: SlackConfig {
+                signing_secret: String::new(),
+                approval_channel: String::new(),
             },
             spine: SpineConfig {
                 url: "http://localhost:3100".into(),

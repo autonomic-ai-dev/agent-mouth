@@ -21,6 +21,15 @@ enum Commands {
     },
     /// Show configuration and status
     Status,
+    /// Validate a bash command/script against approval AST policy
+    Validate {
+        /// Inline command text
+        #[arg(long)]
+        command: Option<String>,
+        /// Script path to validate
+        #[arg(long)]
+        script: Option<std::path::PathBuf>,
+    },
     /// Summarize log input from stdin
     Summarize,
 }
@@ -51,6 +60,17 @@ async fn main() -> anyhow::Result<()> {
         }
         Commands::Summarize => {
             agent_mouth::summarize::summarize()?;
+        }
+        Commands::Validate { command, script } => {
+            let report = match (command, script) {
+                (Some(cmd), None) => agent_mouth::approval::validate_command(&cmd),
+                (None, Some(path)) => agent_mouth::approval::validate_script(&path)?,
+                _ => anyhow::bail!("provide exactly one of --command or --script"),
+            };
+            println!("{}", serde_json::to_string_pretty(&report)?);
+            if !report.approved {
+                std::process::exit(1);
+            }
         }
     }
     Ok(())
