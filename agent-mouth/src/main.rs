@@ -32,7 +32,8 @@ async fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
     match cli.command {
         Commands::Serve => {
-            println!("agent-mouth serve (not yet implemented)");
+            let config = agent_mouth::config::Config::load()?;
+            agent_mouth::serve::start(config).await?;
         }
         Commands::Send { url, message } => {
             let config = agent_mouth::config::Config::load()?;
@@ -43,7 +44,8 @@ async fn main() -> anyhow::Result<()> {
             let config = agent_mouth::config::Config::load()?;
             println!("agent-mouth status");
             println!("  config: {}", agent_mouth::config::Config::config_path().display());
-            println!("  default_webhook: {}", config.notifications.default_webhook);
+            println!("  port: {}", config.server.port);
+            println!("  spine: {}", config.spine.url);
         }
     }
     Ok(())
