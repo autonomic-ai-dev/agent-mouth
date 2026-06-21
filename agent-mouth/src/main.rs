@@ -33,6 +33,12 @@ enum Commands {
     },
     /// Summarize log input from stdin
     Summarize,
+    /// Self-update to the latest GitHub release
+    Update {
+        /// Force update even if already at latest version
+        #[arg(short, long)]
+        force: bool,
+    },
     /// Read or follow supervisor logs
     Log {
         /// List available log names
@@ -95,6 +101,9 @@ async fn main() -> anyhow::Result<()> {
             } else {
                 anyhow::bail!("provide --list or a log name");
             }
+        }
+        Commands::Update { force } => {
+            agent_mouth::update::run_update(force)?;
         }
         Commands::Validate { command, script } => {
             let report = match (command, script) {

@@ -156,8 +156,6 @@ fn summarize_with_anthropic(input: &str, api_key: &str) -> Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     #[test]
     fn test_summarize_locally_with_errors() {
         let input = "INFO: starting server\nERROR: connection refused\nWARN: retry attempt 1\nERROR: timeout after 30s\nINFO: shutdown complete";

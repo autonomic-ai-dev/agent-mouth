@@ -152,8 +152,8 @@ fn extract_slack_command(body: &str) -> String {
         }
     }
 
-    if body.starts_with("payload=") {
-        if let Ok(decoded) = urlencoding::decode(&body["payload=".len()..]) {
+    if let Some(stripped) = body.strip_prefix("payload=") {
+        if let Ok(decoded) = urlencoding::decode(stripped) {
             return extract_slack_command(&decoded);
         }
     }
