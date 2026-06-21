@@ -24,11 +24,26 @@ pub fn summarize() -> Result<()> {
 
 fn summarize_locally(input: &str) -> Result<()> {
     let line_count = input.lines().count();
-    let error_count = input.lines().filter(|l| l.to_lowercase().contains("error")).count();
-    let warn_count = input.lines().filter(|l| l.to_lowercase().contains("warn")).count();
-    let fail_count = input.lines().filter(|l| l.to_lowercase().contains("fail")).count();
-    let trace_count = input.lines().filter(|l| l.to_lowercase().contains("trace")).count();
-    let debug_count = input.lines().filter(|l| l.to_lowercase().contains("debug")).count();
+    let error_count = input
+        .lines()
+        .filter(|l| l.to_lowercase().contains("error"))
+        .count();
+    let warn_count = input
+        .lines()
+        .filter(|l| l.to_lowercase().contains("warn"))
+        .count();
+    let fail_count = input
+        .lines()
+        .filter(|l| l.to_lowercase().contains("fail"))
+        .count();
+    let trace_count = input
+        .lines()
+        .filter(|l| l.to_lowercase().contains("trace"))
+        .count();
+    let debug_count = input
+        .lines()
+        .filter(|l| l.to_lowercase().contains("debug"))
+        .count();
 
     let error_lines: Vec<&str> = input
         .lines()
@@ -67,7 +82,11 @@ fn summarize_locally(input: &str) -> Result<()> {
 fn summarize_with_api(input: &str, api_key: &str) -> Result<()> {
     let client = reqwest::blocking::Client::new();
     let truncated = if input.len() > 8000 {
-        format!("{}... [truncated from {} chars]", &input[..8000], input.len())
+        format!(
+            "{}... [truncated from {} chars]",
+            &input[..8000],
+            input.len()
+        )
     } else {
         input.to_string()
     };
@@ -101,7 +120,11 @@ fn summarize_with_api(input: &str, api_key: &str) -> Result<()> {
 fn summarize_with_anthropic(input: &str, api_key: &str) -> Result<()> {
     let client = reqwest::blocking::Client::new();
     let truncated = if input.len() > 8000 {
-        format!("{}... [truncated from {} chars]", &input[..8000], input.len())
+        format!(
+            "{}... [truncated from {} chars]",
+            &input[..8000],
+            input.len()
+        )
     } else {
         input.to_string()
     };

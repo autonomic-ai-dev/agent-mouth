@@ -27,7 +27,10 @@ pub struct ValidationIssue {
 pub fn validate_command(source: &str) -> ValidationReport {
     let mut issues = Vec::new();
     let mut parser = tree_sitter::Parser::new();
-    if parser.set_language(&tree_sitter_bash::LANGUAGE.into()).is_ok() {
+    if parser
+        .set_language(&tree_sitter_bash::LANGUAGE.into())
+        .is_ok()
+    {
         if let Some(tree) = parser.parse(source, None) {
             walk_node(source, tree.root_node(), &mut issues);
         } else {
@@ -40,9 +43,9 @@ pub fn validate_command(source: &str) -> ValidationReport {
     }
 
     let has_error = issues.iter().any(|i| i.severity == "error");
-    let has_destructive = issues.iter().any(|i| {
-        i.message.contains("rm -rf") || i.message.contains("code injection")
-    });
+    let has_destructive = issues
+        .iter()
+        .any(|i| i.message.contains("rm -rf") || i.message.contains("code injection"));
 
     let approved = !has_error && !has_destructive;
     let reason = if approved {
@@ -66,8 +69,8 @@ pub fn validate_command(source: &str) -> ValidationReport {
 }
 
 pub fn validate_script(path: &Path) -> Result<ValidationReport> {
-    let source = std::fs::read_to_string(path)
-        .with_context(|| format!("read script {}", path.display()))?;
+    let source =
+        std::fs::read_to_string(path).with_context(|| format!("read script {}", path.display()))?;
     Ok(validate_command(&source))
 }
 
@@ -108,19 +111,14 @@ fn walk_node(source: &str, node: Node, issues: &mut Vec<ValidationIssue>) {
 
     if kind == "command" {
         let lower = text.to_lowercase();
-        if lower.starts_with("rm ")
-            && (lower.contains(" -rf ") || lower.contains(" -fr "))
-        {
+        if lower.starts_with("rm ") && (lower.contains(" -rf ") || lower.contains(" -fr ")) {
             issues.push(ValidationIssue {
                 line,
                 severity: "error".into(),
                 message: "destructive rm -rf blocked by approval policy".into(),
             });
         }
-        if lower.starts_with("eval ")
-            || lower.starts_with("source ")
-            || lower.starts_with(". ")
-        {
+        if lower.starts_with("eval ") || lower.starts_with("source ") || lower.starts_with(". ") {
             issues.push(ValidationIssue {
                 line,
                 severity: "error".into(),

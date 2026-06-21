@@ -66,7 +66,10 @@ async fn main() -> anyhow::Result<()> {
         Commands::Status => {
             let config = agent_mouth::config::Config::load()?;
             println!("agent-mouth status");
-            println!("  config: {}", agent_mouth::config::Config::config_path().display());
+            println!(
+                "  config: {}",
+                agent_mouth::config::Config::config_path().display()
+            );
             println!("  port: {}", config.server.port);
             println!("  spine: {}", config.spine.url);
         }

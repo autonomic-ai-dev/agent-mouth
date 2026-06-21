@@ -1,9 +1,9 @@
 use axum::{
-    Json, Router,
     body::Bytes,
     extract::State,
     http::{HeaderMap, StatusCode},
     routing::{get, post},
+    Json, Router,
 };
 use std::sync::Arc;
 
@@ -147,10 +147,7 @@ fn extract_slack_command(body: &str) -> String {
                 return value.to_string();
             }
         }
-        if let Some(message) = json
-            .pointer("/message/text")
-            .and_then(|v| v.as_str())
-        {
+        if let Some(message) = json.pointer("/message/text").and_then(|v| v.as_str()) {
             return message.to_string();
         }
     }

@@ -26,7 +26,12 @@ impl SpineClient {
             "last_seen": chrono::Utc::now().to_rfc3339(),
             "metadata": HashMap::<String, String>::new(),
         });
-        let resp = self.client.post(format!("{}/api/v1/agents", self.url)).json(&info).send().await?;
+        let resp = self
+            .client
+            .post(format!("{}/api/v1/agents", self.url))
+            .json(&info)
+            .send()
+            .await?;
         if !resp.status().is_success() {
             tracing::warn!("Agent registration returned {}", resp.status());
         } else {
@@ -36,7 +41,11 @@ impl SpineClient {
     }
 
     pub async fn heartbeat(&self) -> anyhow::Result<()> {
-        let resp = self.client.post(format!("{}/api/v1/agents/{}", self.url, self.name)).send().await?;
+        let resp = self
+            .client
+            .post(format!("{}/api/v1/agents/{}", self.url, self.name))
+            .send()
+            .await?;
         if !resp.status().is_success() {
             tracing::warn!("Heartbeat returned {}", resp.status());
         }
@@ -50,7 +59,12 @@ impl SpineClient {
             "payload": payload,
             "metadata": {},
         });
-        let resp = self.client.post(format!("{}/api/v1/events", self.url)).json(&body).send().await?;
+        let resp = self
+            .client
+            .post(format!("{}/api/v1/events", self.url))
+            .json(&body)
+            .send()
+            .await?;
         if !resp.status().is_success() {
             tracing::warn!("Event publish returned {}", resp.status());
         }
