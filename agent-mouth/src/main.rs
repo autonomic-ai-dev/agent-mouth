@@ -33,6 +33,17 @@ enum Commands {
     },
     /// Summarize log input from stdin
     Summarize,
+    /// Read or follow supervisor logs
+    Log {
+        /// List available log names
+        #[arg(long)]
+        list: bool,
+        /// Follow log output (tail -f style)
+        #[arg(short, long)]
+        follow: bool,
+        /// Name of the log (omitted with --list)
+        name: Option<String>,
+    },
 }
 
 #[tokio::main]
@@ -61,6 +72,26 @@ async fn main() -> anyhow::Result<()> {
         }
         Commands::Summarize => {
             agent_mouth::summarize::summarize()?;
+        }
+        Commands::Log { list, follow, name } => {
+            if list {
+                let names = agent_mouth::log::list_logs()?;
+                if names.is_empty() {
+                    println!("no logs found");
+                } else {
+                    for n in &names {
+                        println!("{n}");
+                    }
+                }
+            } else if let Some(n) = name {
+                if follow {
+                    agent_mouth::log::follow_log(&n)?;
+                } else {
+                    agent_mouth::log::print_log(&n)?;
+                }
+            } else {
+                anyhow::bail!("provide --list or a log name");
+            }
         }
         Commands::Validate { command, script } => {
             let report = match (command, script) {
