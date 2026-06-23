@@ -86,6 +86,8 @@ In standalone mode, mouth is a CLI security and notification tool. In integrated
 | `agent-mouth summarize` | Summarize piped log input |
 | `agent-mouth status` | Show config, webhook targets, AST policy |
 
+Global `--progress` (or `AGENT_PROGRESS=1`) enables structured ProgressTree CLI output.
+
 ---
 
 ## HTTP API
