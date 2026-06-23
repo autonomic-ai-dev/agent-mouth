@@ -1,8 +1,10 @@
 # agent-mouth — Communication and Approvals
 
-**AST-based command validation, Slack webhook approvals, outbound notifications, and log summarization.**
+**Cloud-Native role: Ingress / API gateway** — AST command validation, Slack approvals, notifications, and log summarization.
 
-agent-mouth is the **voice** of the Autonomic AI ecosystem. It handles all outward communication: validating shell commands against a tree-sitter AST policy (blocking `rm -rf /` before execution), sending Slack webhook approval requests for human-in-the-loop gates, dispatching outbound notifications, and compressing verbose log output into human-readable summaries.
+agent-mouth is the **I/O gateway** for Autonomic. It validates shell commands against a tree-sitter AST policy before execution, sends Slack webhook approval requests for human-in-the-loop gates, dispatches outbound notifications, and compresses verbose logs into readable summaries.
+
+> Codename: *mouth organ*. Mapping: [cloud-native-platform.md](https://github.com/autonomic-ai-dev/agent-body/blob/master/docs/cloud-native-platform.md)
 
 The key design: **validate before you act.** Every command passes through a tree-sitter AST parser that evaluates safety rules before agent-spine or agent-muscle executes it. Dangerous commands are rejected at the validation layer, not at the shell.
 
