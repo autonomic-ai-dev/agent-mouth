@@ -1,24 +1,23 @@
-# agent-mouth — Communication and Approvals
+# agent-mouth — API Gateway & Command Validation
 
-**Cloud-Native role: Ingress / API gateway** — AST command validation, Slack approvals, notifications, and log summarization.
+**Cloud-Native role: Ingress / API gateway** — AST command validation, API routing, Slack webhooks, and log summarization.
 
-agent-mouth is the **I/O gateway** for Autonomic. It validates shell commands against a tree-sitter AST policy before execution, sends Slack webhook approval requests for human-in-the-loop gates, dispatches outbound notifications, and compresses verbose logs into readable summaries.
-
-> Codename: *mouth organ*. Mapping: [cloud-native-platform.md](https://github.com/autonomic-ai-dev/agent-body/blob/master/docs/cloud-native-platform.md)
-
-The key design: **validate before you act.** Every command passes through a tree-sitter AST parser that evaluates safety rules before agent-spine or agent-muscle executes it. Dangerous commands are rejected at the validation layer, not at the shell.
+`agent-mouth` is the **Ingress API Gateway** for the Autonomic cluster. All external requests—whether from Cursor, Opencode, a web dashboard, or a Slack webhook—flow through `agent-mouth` before reaching internal daemons like `agent-spine` or `agent-muscle`. 
 
 ---
 
-## Core Concept
+## Under the Hood: How it Works
 
-AI agents generate shell commands — and some of those commands are dangerous. A simple `rm -rf /` in a generated deployment script can destroy infrastructure. A `curl | bash` can introduce malware.
+Because agents generate untrusted commands and users need real-time feedback, `agent-mouth` acts as a strict validation and routing layer:
 
-agent-mouth prevents these failures at three points:
+1. **Pre-Execution AST Validation**
+Before `agent-muscle` is allowed to execute a bash command, `agent-mouth` parses the command using a `tree-sitter` AST parser. It evaluates the command against a strict security policy. Safe commands pass instantly. Dangerous commands (like `rm -rf /` or `> /dev/sda`) are rejected at the parser level with a structured JSON error, *before* they ever hit a shell.
 
-1. **Pre-execution validation** — a tree-sitter AST parser evaluates bash commands against an approval policy. Safe commands (`echo`, `cargo test`, `ls`) pass instantly. Dangerous commands (`rm -rf`, `> /dev/sda`, `chmod -R 777 /`) are rejected with a clear reason.
-2. **Human approval** — for commands that require discretion, mouth sends a Slack webhook with the command details and waits for approve/deny.
-3. **Post-execution summarization** — verbose log output is compressed into structured summaries for operator consumption.
+2. **WebSocket & SSE Real-time Streaming**
+`agent-mouth` translates internal NATS JetStream events into external-facing WebSocket and Server-Sent Events (SSE) streams. This allows external React dashboards to visualize agent progress in real-time without needing to connect directly to the NATS broker.
+
+3. **Human Approval (Webhooks)**
+For workflows that reach an `ApprovalGate`, `agent-mouth` dispatches a Slack webhook containing the context and waits for a cryptographic approve/deny callback from the user before resuming the DAG.
 
 ```mermaid
 flowchart LR
