@@ -34,6 +34,8 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
+    /// Start the MCP stdio server
+    Mcp,
     /// Start the webhook listener daemon
     Serve,
     /// Send a notification via webhook
@@ -85,6 +87,10 @@ async fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
     apply_progress_env(cli.progress.into());
     match cli.command {
+        Commands::Mcp => {
+            let config = agent_mouth::config::Config::load()?;
+            agent_mouth::mcp_server::MouthMcp::run(config).await?;
+        }
         Commands::Serve => {
             let config = agent_mouth::config::Config::load()?;
             agent_mouth::serve::start(config).await?;
