@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.6] - 2026-06-27
+
+### Added
+
+- **MCP server** (`agent-mouth mcp`) — starts an MCP stdio server for gateway aggregation. Used by `agent-body serve-mcp`.
+- **Organ tool definitions** — `mouth_validate_ast`, `mouth_request_approval` with `#[tool(tool_box)]` naming convention
+- **Integration tests** — AST validation tool handler with safe/dangerous commands
+
 ## [0.5.5] - 2026-06-23
 
 ### Added

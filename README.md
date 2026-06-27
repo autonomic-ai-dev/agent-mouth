@@ -82,6 +82,7 @@ In standalone mode, mouth is a CLI security and notification tool. In integrated
 | Command | Description |
 |---------|-------------|
 | `agent-mouth serve` | HTTP daemon with webhook routes on port 3104 |
+| `agent-mouth mcp` | Start MCP stdio server (for gateway aggregation) |
 | `agent-mouth send <message>` | POST to configured webhook URL |
 | `agent-mouth validate --command\|--script` | Tree-sitter bash AST safety gate |
 | `agent-mouth summarize` | Summarize piped log input |

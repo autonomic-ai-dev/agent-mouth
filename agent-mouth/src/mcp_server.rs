@@ -40,18 +40,21 @@ struct RequestApprovalParams {
 
 #[tool(tool_box)]
 impl MouthMcp {
-    #[tool(description = "Pass a bash command through tree-sitter AST validation to check if it violates security policy")]
+    #[tool(
+        description = "Pass a bash command through tree-sitter AST validation to check if it violates security policy"
+    )]
     async fn mouth_validate_ast(
         &self,
         #[tool(aggr)] params: ValidateAstParams,
     ) -> Result<CallToolResult, McpError> {
         let report = crate::approval::validate_command(&params.command);
-        let text =
-            serde_json::to_string_pretty(&report).unwrap_or_else(|_| "{}".to_string());
+        let text = serde_json::to_string_pretty(&report).unwrap_or_else(|_| "{}".to_string());
         Ok(CallToolResult::success(vec![Content::text(text)]))
     }
 
-    #[tool(description = "Request human approval before destructive operations via Slack/Discord webhook")]
+    #[tool(
+        description = "Request human approval before destructive operations via Slack/Discord webhook"
+    )]
     async fn mouth_request_approval(
         &self,
         #[tool(aggr)] params: RequestApprovalParams,
@@ -93,5 +96,39 @@ impl ServerHandler for MouthMcp {
             ),
             ..Default::default()
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use rmcp::model::RawContent;
+
+    #[tokio::test]
+    async fn mouth_validate_ast_blocks_dangerous_command() {
+        let mcp = MouthMcp::new(Config::default());
+        let params = ValidateAstParams {
+            command: "rm -rf /".into(),
+        };
+        let result = mcp.mouth_validate_ast(params).await.unwrap();
+        let text = result.content.iter()
+            .filter_map(|c| if let RawContent::Text(t) = &c.raw { Some(&t.text[..]) } else { None })
+            .collect::<Vec<_>>()
+            .join("");
+        assert!(text.contains("false"), "expected rejected: {text}");
+    }
+
+    #[tokio::test]
+    async fn mouth_validate_ast_passes_safe_command() {
+        let mcp = MouthMcp::new(Config::default());
+        let params = ValidateAstParams {
+            command: "echo hello".into(),
+        };
+        let result = mcp.mouth_validate_ast(params).await.unwrap();
+        let text = result.content.iter()
+            .filter_map(|c| if let RawContent::Text(t) = &c.raw { Some(&t.text[..]) } else { None })
+            .collect::<Vec<_>>()
+            .join("");
+        assert!(text.contains("true"), "expected approved: {text}");
     }
 }
