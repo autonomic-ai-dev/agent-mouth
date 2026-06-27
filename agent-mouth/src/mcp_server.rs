@@ -98,3 +98,37 @@ impl ServerHandler for MouthMcp {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use rmcp::model::RawContent;
+
+    #[tokio::test]
+    async fn mouth_validate_ast_blocks_dangerous_command() {
+        let mcp = MouthMcp::new(Config::default());
+        let params = ValidateAstParams {
+            command: "rm -rf /".into(),
+        };
+        let result = mcp.mouth_validate_ast(params).await.unwrap();
+        let text = result.content.iter()
+            .filter_map(|c| if let RawContent::Text(t) = &c.raw { Some(&t.text[..]) } else { None })
+            .collect::<Vec<_>>()
+            .join("");
+        assert!(text.contains("false"), "expected rejected: {text}");
+    }
+
+    #[tokio::test]
+    async fn mouth_validate_ast_passes_safe_command() {
+        let mcp = MouthMcp::new(Config::default());
+        let params = ValidateAstParams {
+            command: "echo hello".into(),
+        };
+        let result = mcp.mouth_validate_ast(params).await.unwrap();
+        let text = result.content.iter()
+            .filter_map(|c| if let RawContent::Text(t) = &c.raw { Some(&t.text[..]) } else { None })
+            .collect::<Vec<_>>()
+            .join("");
+        assert!(text.contains("true"), "expected approved: {text}");
+    }
+}
