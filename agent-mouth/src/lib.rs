@@ -1,5 +1,6 @@
 pub mod approval;
 pub mod config;
+pub mod local_inference;
 pub mod log;
 pub mod mcp_server;
 pub mod notify;
