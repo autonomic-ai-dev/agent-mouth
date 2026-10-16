@@ -1,5 +1,7 @@
 # agent-mouth — API Gateway & Command Validation
 
+Agent context: [docs/CONTEXT.md](docs/CONTEXT.md).
+
 **Cloud-Native role: Ingress / API gateway** — AST command validation, API routing, Slack webhooks, and log summarization.
 
 `agent-mouth` is the **Ingress API Gateway** for the Autonomic cluster. All external requests—whether from Cursor, Opencode, a web dashboard, or a Slack webhook—flow through `agent-mouth` before reaching internal daemons like `agent-spine` or `agent-muscle`. 
