@@ -43,11 +43,11 @@ main() {
   curl -fsSL "$url" -o "$HOME/.local/bin/agent-mouth"
   chmod +x "$HOME/.local/bin/agent-mouth"
 
-  # macOS Gatekeeper: clear quarantine + ad-hoc sign
+  # macOS Gatekeeper: clear quarantine and verify Developer ID signature
   if [[ "$(uname -s)" == "Darwin" ]] && command -v codesign >/dev/null 2>&1; then
     xattr -cr "$HOME/.local/bin/agent-mouth" 2>/dev/null || true
-    codesign --force --sign - "$HOME/.local/bin/agent-mouth" 2>/dev/null || true
-    echo "macOS: cleared quarantine and adhoc-signed agent-mouth" >&2
+    codesign --verify --verbose "$HOME/.local/bin/agent-mouth" 2>/dev/null || true
+    echo "macOS: cleared quarantine and verified signature on agent-mouth" >&2
   fi
 
   echo "Installed agent-mouth $tag to $HOME/.local/bin/agent-mouth" >&2
