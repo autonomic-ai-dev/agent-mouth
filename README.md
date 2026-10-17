@@ -1,6 +1,6 @@
 # agent-mouth — API Gateway & Command Validation
 
-Agent context: [docs/CONTEXT.md](docs/CONTEXT.md) · Communication Guide: [https://autonomic-ai.dev/docs/communication](https://autonomic-ai.dev/docs/communication) · Architecture: [https://autonomic-ai.dev/docs/architecture](https://autonomic-ai.dev/docs/architecture).
+Agent context: [CONTEXT.md](CONTEXT.md) · Communication Guide: [https://autonomic-ai.dev/docs/communication](https://autonomic-ai.dev/docs/communication) · Architecture: [https://autonomic-ai.dev/docs/architecture](https://autonomic-ai.dev/docs/architecture).
 
 **Cloud-Native role: Ingress / API gateway** — AST command validation, API routing, Slack webhooks, and log summarization.
 
