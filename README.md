@@ -1,6 +1,6 @@
 # agent-mouth — API Gateway & Command Validation
 
-Agent context: [docs/CONTEXT.md](docs/CONTEXT.md).
+Agent context: [docs/CONTEXT.md](docs/CONTEXT.md) · Architecture: [https://autonomic-ai.dev/docs/architecture](https://autonomic-ai.dev/docs/architecture).
 
 **Cloud-Native role: Ingress / API gateway** — AST command validation, API routing, Slack webhooks, and log summarization.
 
@@ -142,6 +142,12 @@ Section `[mouth]` in `~/.autonomic/config.toml` (default port **3104**).
 [mouth]
 webhook_url = "https://hooks.slack.com/services/..."
 ```
+
+---
+
+## Architecture
+
+For the complete 11-organ architecture specification, data flows, and MCP tool contracts, see the centralized [Autonomic AI Architecture Hub](https://autonomic-ai.dev/docs/architecture).
 
 ---
 
