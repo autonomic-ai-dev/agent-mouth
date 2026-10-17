@@ -7,7 +7,8 @@ Ingress / API gateway for Autonomic (AST validation, webhooks, summarize). Part 
 | Role | Ingress / API gateway |
 | Binary | `agent-mouth` |
 | HTTP | `:3104` |
-| Version | 0.6.0+ |
+| Version | v1.0.0-beta.2 |
+| Docs Hub | [https://autonomic-ai.dev/docs/communication](https://autonomic-ai.dev/docs/communication) · [Architecture](https://autonomic-ai.dev/docs/architecture) |
 
 ## When to use
 
@@ -33,4 +34,4 @@ Path filter on `agent-mouth/**` + Cargo/Makefile/scripts/`.github`. Docs-only PR
 
 ## Related
 
-Spine (gates) · muscle (execute after approve) · brain (verify ledger)
+Operator usage: [https://autonomic-ai.dev/docs/communication](https://autonomic-ai.dev/docs/communication) · Architecture: [https://autonomic-ai.dev/docs/architecture](https://autonomic-ai.dev/docs/architecture) · Spine (gates) · muscle (execute after approve) · brain (verify ledger)
