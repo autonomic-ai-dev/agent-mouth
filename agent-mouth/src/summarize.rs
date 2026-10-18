@@ -145,7 +145,11 @@ fn summarize_heuristics(input: &str) -> String {
     if !error_lines.is_empty() {
         out.push_str("Key issues:\n");
         for (i, line) in error_lines.iter().enumerate() {
-            out.push_str(&format!("  {}. {}\n", i + 1, truncate_line(line.trim(), 117)));
+            out.push_str(&format!(
+                "  {}. {}\n",
+                i + 1,
+                truncate_line(line.trim(), 117)
+            ));
         }
     } else {
         out.push_str("No errors or failures detected.\n");
@@ -204,7 +208,11 @@ fn summarize_with_anthropic(input: &str, api_key: &str) -> Result<String> {
 
 fn truncate_input(input: &str) -> String {
     if input.len() > 8000 {
-        format!("{}... [truncated from {} chars]", &input[..8000], input.len())
+        format!(
+            "{}... [truncated from {} chars]",
+            &input[..8000],
+            input.len()
+        )
     } else {
         input.to_string()
     }
