@@ -34,8 +34,12 @@ impl LocalInferenceConfig {
         Self {
             base_url: std::env::var("AGENT_MOUTH_LLAMA_URL")
                 .unwrap_or_else(|_| DEFAULT_LLAMA_URL.into()),
-            llama_bin: std::env::var("AGENT_MOUTH_LLAMA_BIN").ok().filter(|s| !s.is_empty()),
-            model: std::env::var("AGENT_MOUTH_MODEL").ok().filter(|s| !s.is_empty()),
+            llama_bin: std::env::var("AGENT_MOUTH_LLAMA_BIN")
+                .ok()
+                .filter(|s| !s.is_empty()),
+            model: std::env::var("AGENT_MOUTH_MODEL")
+                .ok()
+                .filter(|s| !s.is_empty()),
             max_tokens: MAX_TOKENS,
             timeout: Duration::from_secs(30),
         }
@@ -144,7 +148,9 @@ fn complete_http_native(
     if let Some(text) = json["content"].as_str() {
         return Ok(text.trim().to_string());
     }
-    Err(anyhow!("llama.cpp completion response missing content: {json}"))
+    Err(anyhow!(
+        "llama.cpp completion response missing content: {json}"
+    ))
 }
 
 fn complete_subprocess(
@@ -166,9 +172,7 @@ fn complete_subprocess(
         &max_tokens.to_string(),
         "--no-display-prompt",
     ]);
-    let output = cmd
-        .output()
-        .with_context(|| format!("spawn {bin}"))?;
+    let output = cmd.output().with_context(|| format!("spawn {bin}"))?;
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
         return Err(anyhow!("{bin} exited {}: {stderr}", output.status));
@@ -196,7 +200,10 @@ mod tests {
 
     #[test]
     fn truncate_respects_cap() {
-        let long = (0..300).map(|i| format!("w{i}")).collect::<Vec<_>>().join(" ");
+        let long = (0..300)
+            .map(|i| format!("w{i}"))
+            .collect::<Vec<_>>()
+            .join(" ");
         let out = truncate_tokens_approx(&long, MAX_TOKENS);
         assert_eq!(out.split_whitespace().count(), MAX_TOKENS as usize);
     }
