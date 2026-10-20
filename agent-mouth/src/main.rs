@@ -57,6 +57,11 @@ enum Commands {
         #[arg(long)]
         script: Option<std::path::PathBuf>,
     },
+    /// Human approval queue for gated actions (requests wait for approve or deny)
+    Approvals {
+        #[command(subcommand)]
+        action: ApprovalAction,
+    },
     /// Summarize log input from stdin
     Summarize,
     /// Self-update to the latest GitHub release
@@ -76,6 +81,32 @@ enum Commands {
         /// Name of the log (omitted with --list)
         name: Option<String>,
     },
+}
+
+#[derive(Subcommand)]
+enum ApprovalAction {
+    /// Open a request and wait until it is approved, denied, or times out
+    Request {
+        /// Unique request id (letters, digits, '-' or '_')
+        #[arg(long)]
+        id: String,
+        /// What is being approved, shown to the approver
+        #[arg(long)]
+        summary: String,
+        /// Seconds to wait before the request times out (fails closed)
+        #[arg(long, default_value_t = 300)]
+        timeout_secs: u64,
+    },
+    /// Approve a pending request
+    Approve { id: String },
+    /// Deny a pending request
+    Deny { id: String },
+    /// List pending requests
+    List,
+}
+
+fn approvals_dir() -> std::path::PathBuf {
+    agent_body_core::organ_state_dir("mouth").join("approvals")
 }
 
 #[tokio::main]
@@ -110,6 +141,68 @@ async fn main() -> anyhow::Result<()> {
             );
             println!("  port: {}", config.server.port);
             println!("  spine: {}", config.spine.url);
+        }
+        Commands::Approvals { action } => {
+            let dir = approvals_dir();
+            match action {
+                ApprovalAction::Request {
+                    id,
+                    summary,
+                    timeout_secs,
+                } => {
+                    agent_mouth::approvals::open(&dir, &id, &summary)?;
+                    let config = agent_mouth::config::Config::load()?;
+                    let webhook = &config.notifications.default_webhook;
+                    if !webhook.is_empty() {
+                        let message = format!(
+                            "Approval needed: {id} — {summary}\nRun: agent-mouth approvals approve {id}"
+                        );
+                        agent_mouth::notify::send_webhook(webhook, &message).await?;
+                    }
+                    let outcome = agent_mouth::approvals::wait(
+                        &dir,
+                        &id,
+                        std::time::Duration::from_secs(timeout_secs),
+                        std::time::Duration::from_millis(500),
+                    )?;
+                    match outcome {
+                        agent_mouth::approvals::Decision::Approved => println!("approved: {id}"),
+                        agent_mouth::approvals::Decision::Denied => {
+                            eprintln!("denied: {id}");
+                            std::process::exit(2);
+                        }
+                        agent_mouth::approvals::Decision::TimedOut => {
+                            eprintln!("timed out waiting for approval: {id} (fails closed)");
+                            std::process::exit(3);
+                        }
+                    }
+                }
+                ApprovalAction::Approve { id } => {
+                    agent_mouth::approvals::decide(
+                        &dir,
+                        &id,
+                        agent_mouth::approvals::Status::Approved,
+                    )?;
+                    println!("approved: {id}");
+                }
+                ApprovalAction::Deny { id } => {
+                    agent_mouth::approvals::decide(
+                        &dir,
+                        &id,
+                        agent_mouth::approvals::Status::Denied,
+                    )?;
+                    println!("denied: {id}");
+                }
+                ApprovalAction::List => {
+                    let pending = agent_mouth::approvals::list_pending(&dir)?;
+                    if pending.is_empty() {
+                        println!("no pending approvals");
+                    }
+                    for approval in pending {
+                        println!("{}\t{}", approval.id, approval.summary);
+                    }
+                }
+            }
         }
         Commands::Summarize => {
             agent_mouth::summarize::summarize()?;
