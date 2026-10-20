@@ -1,4 +1,5 @@
 pub mod approval;
+pub mod approvals;
 pub mod config;
 pub mod local_inference;
 pub mod log;
