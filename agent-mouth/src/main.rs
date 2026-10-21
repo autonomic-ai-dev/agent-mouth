@@ -38,11 +38,14 @@ enum Commands {
     Mcp,
     /// Start the webhook listener daemon
     Serve,
-    /// Send a notification via webhook
+    /// Send a notification via webhook, or via the Slack bot with --channel
     Send {
         /// Webhook URL (or use from config)
         #[arg(short, long)]
         url: Option<String>,
+        /// Slack channel id to post to with the bot token in SLACK_BOT_TOKEN
+        #[arg(long)]
+        channel: Option<String>,
         /// Message text to send
         message: String,
     },
@@ -127,11 +130,29 @@ async fn main() -> anyhow::Result<()> {
             let config = agent_mouth::config::Config::load()?;
             agent_mouth::serve::start(config).await?;
         }
-        Commands::Send { url, message } => {
-            let config = agent_mouth::config::Config::load()?;
-            let webhook_url = url.unwrap_or_else(|| config.notifications.default_webhook.clone());
-            agent_mouth::notify::send_webhook(&webhook_url, &message).await?;
-        }
+        Commands::Send {
+            url,
+            channel,
+            message,
+        } => match channel {
+            Some(channel) => {
+                let token = std::env::var("SLACK_BOT_TOKEN")
+                    .map_err(|_| anyhow::anyhow!("SLACK_BOT_TOKEN is not set"))?;
+                agent_mouth::notify::send_slack(
+                    "https://slack.com/api",
+                    &token,
+                    &channel,
+                    &message,
+                )
+                .await?;
+            }
+            None => {
+                let config = agent_mouth::config::Config::load()?;
+                let webhook_url =
+                    url.unwrap_or_else(|| config.notifications.default_webhook.clone());
+                agent_mouth::notify::send_webhook(&webhook_url, &message).await?;
+            }
+        },
         Commands::Status => {
             let config = agent_mouth::config::Config::load()?;
             println!("agent-mouth status");
