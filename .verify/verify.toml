@@ -1,0 +1,4 @@
+[verify]
+commands = [
+  "sh .verify/checks/require_tests.sh",
+]

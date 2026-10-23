@@ -100,7 +100,7 @@ Global `--progress` (or `AGENT_PROGRESS=1`) enables structured ProgressTree CLI 
 |--------|----------|-------------|
 | `GET` | `/health` | Daemon health |
 | `POST` | `/webhook/slack/approval` | Validated approval payload |
-| `POST` | `/send` | Outbound notification |
+| `POST` | `/webhook/send` | Outbound notification |
 
 ---
 
