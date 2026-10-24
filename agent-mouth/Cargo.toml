@@ -4,7 +4,7 @@ version = "1.0.0-beta.3.9"
 edition = "2021"
 
 [dependencies]
-agent-body-core = { git = "https://github.com/autonomic-ai-dev/agent-body", tag = "v1.0.0-beta.3" }
+agent-body-core = { git = "https://github.com/autonomic-ai-dev/agent-body", tag = "v1.0.0-beta.3.11" }
 anyhow = "1"
 axum = "0.7"
 chrono = "0.4"
@@ -22,6 +22,4 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 rmcp = { version = "1.7.0", features = ["server", "transport-io", "macros"] }
 schemars = "1"
-tree-sitter = "0.26"
-tree-sitter-bash = "0.25"
 urlencoding = "2"
