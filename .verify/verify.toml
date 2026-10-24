@@ -1,4 +1,9 @@
 [verify]
 commands = [
+  "bash .verify/checks/route_drift.sh",
   "sh .verify/checks/require_tests.sh",
 ]
+
+[verify.default]
+command = ["sh", ".verify/checks/require_tests.sh"]
+timeout_secs = 600
