@@ -26,6 +26,10 @@ Summary: agent-mouth decides whether a shell command is safe to run by parsing i
 - `mcp-server`: Serves the gate over MCP.
   - Behaviour: `agent-mouth mcp` (stdio) for the gateway. Tools: `mouth_validate_ast`, `mouth_request_approval`.
 
+## Code
+
+- `agent-mouth`
+
 ## How to get to it (user POV)
 
 - CLI: `agent-mouth validate`, `send`, `summarize`, `status`, `serve`, `mcp`
