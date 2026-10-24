@@ -31,6 +31,7 @@ Summary: agent-mouth decides whether a shell command is safe to run by parsing i
 - `agent-mouth`
 
 ## How to get to it (user POV)
+- Command checks delegate to `agent_body_core::guard::inspect` in `approval.rs`. The rules are in the `command-policy` feature map in agent-body.
 
 - CLI: `agent-mouth validate`, `send`, `summarize`, `status`, `serve`, `mcp`
 - HTTP: `GET /health`, `POST /webhook/send`, `POST /webhook/slack/approval` on `http://localhost:3104` (port confirmed in `agent-mouth/src/config.rs`)
